@@ -18,7 +18,7 @@ Code:
 
 The modified cutting angle method can be executed with the file run_cav.py and the implemented algorithm is located in cav.py. All further explanations about the execution of the code are included in the comments of the py files.
 
-I have also attached a dataset on which the algorithm can be tested.
+I have also attached a dataset on which the algorithm can be tested (Pezzack_data_1.npz).
 
 
 If you have any further questions about my work, please send me an email at: 

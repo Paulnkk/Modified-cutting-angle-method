@@ -10,7 +10,7 @@ The modified cutting angle method calculates the knots (the number of knots is d
 
 The main modifications to the cutting angle method by G.Beliakov:
 
-The modified cutting angle method is applied on a different allowable set than the cutting angle method by G.Beliakov.
+The modified cutting angle method is applied on a different feasible set than the cutting angle method by G.Beliakov.
 
 The auxiliary vectors for the solution and determination of the auxiliary problems (which are solved in the cutting angle method) are defined differently than in the cutting angle method by G.Beliakov.
 

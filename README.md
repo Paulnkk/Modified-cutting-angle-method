@@ -11,7 +11,9 @@ These functions are continuous polynomial functions defined on an interval (the 
 Here the question arises how such nodes are determined, since the arbitrary choice of nodes most likely extrapolates the data set insufficiently. 
 
 The modified cutting angle method calculates the knots (the number of knots is determined in advance) so that the distance of the spline function to the y-values of the data is minimal (in the case of data points from R^2). In other words, the modified cutting angle method globally tries to solve a nonlinear least squares problem. 
+
 The cutting angle method iteratively approximates the actual problem by auxiliary problems. In the plane, the auxiliary problems look like ordered cutting angles, which is where the method gets its name. These auxiliary problems are solved globally in each iteration until the termination criterion takes effect (i.e. until the auxiliary problem sufficiently approximates the actual problem and thus also generates a sufficiently satisfactory solution at the global minimum point of the problem). 
+
 It should be noted here that the feasible set of the actual problem must be transformed into a special version of a simplex via a coordinate transformation in each iteration before the modified cutting angle method can be applied.
 
 The modified Cutting angle method is based on findings of 'Cutting angle method - a tool for constrained global optimization' (https://www.tandfonline.com/doi/abs/10.1080/10556780410001647177) by G.Beliakov.

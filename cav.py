@@ -1,5 +1,5 @@
 '''
-Verwendete Pakete
+Packages used
 '''
 import numpy as np
 import copy
@@ -10,31 +10,35 @@ import itertools
 import timeit
 import time
 import scipy.special
+'''
+The following references are from my paper which was written in German. Of course, the mathematics remains unchanged.
+'''
+
 
 def beliakov_cav(x, y, order = 4, g = 4, gamma= 0.000001, runtime = 60*3, glob_min = [880.0, 890.0, 900.0, 910.0], L = 16000):
     '''
-    Cutting-Angle-Verfahren aus Algorithmus 4.11 der BA. Hier sollte erwähnt werden, dass dieses CAV ausschließlich mit
-    den inneren Knoten arbeitet, da insbesondere die Rücktransformation einfacher realisiert werden kann.
+    Cutting Angle method from Algorithm 4.11 of the paper. Here it should be mentioned that this CAV works exclusively with
+    the inner nodes, because especially the back transformation can be realized more easily.
     '''
 
     list_l_n = [] #\mathcal{K}
     l_m = [] #\mathcal{K}_{k = 1}^n
-    L_k = [] #Leere Liste \mathcal{L}^K
-    fehler_list = [] #Liste mit den berechneten Fehlern für jede Iteration des CAV
-    f_list = [] #Verwendung der List, um f_{best} zu berechnen
-    min_list = [] #Liste, welche alle Funktionswerte beinhaltet, die das CAV berechnet
-    knots_list = [] #Liste in der alle Knoten gespeichert werden
+    L_k = [] #Empty list \mathcal{L}^K
+    fehler_list = [] #List with the calculated errors for each iteration of the CAV
+    f_list = [] #Using the list to calculate f_{best}
+    min_list = [] #List containing all function values calculated by the CAV
+    knots_list = [] #List in which all nodes are stored
     '''
-    Aufpassen, da in dieser Zelle, in Function_iph(), matrixEtE() und rechteseite() die Anzahl der inneren Knoten angepasst
-    werden muss.
+    Be careful, because in this cell, in Function_iph(), matrixEtE() and rechteseite() the number of inner nodes must be adjusted.
+    must be adjusted.
     '''
     n = g
     k = order - 1
     m = 0 #m aus (4.3), um die Basis-Vektoren zu initialisieren m = 1,\ldots,n
 
     '''
-    Globaler Minimalpunkt (starting_knots), um c berechnen zu können, siehe Methode "Function_iph". Muss ebenfalls je nach
-    Datensatz und Anzahl der inneren Knoten angepasst werden.
+    Global minimum point (starting_knots) to be able to calculate c, see method "Function_iph". Must also be adjusted depending on
+    data set and number of inner nodes.
     '''
     starting_knots = np.array(glob_min)
     #\min{x_r}
@@ -42,7 +46,7 @@ def beliakov_cav(x, y, order = 4, g = 4, gamma= 0.000001, runtime = 60*3, glob_m
     #\max{x_r}
     b = max(x)
     '''
-    Berechnung der Basis-Vektoren nach (4.41).
+    Calculation of the basis vectors according to (4.41).
     '''
     for i in range(n+1):
         e_m = np.zeros(n+1)
@@ -62,7 +66,7 @@ def beliakov_cav(x, y, order = 4, g = 4, gamma= 0.000001, runtime = 60*3, glob_m
         f_list.append(f_e_m)
         m = m + 1
     '''
-    Initialisierung von Algorithmus 4.11.
+    Initialization of algorithm 4.11.
     '''
     L_k = [L_k]
     f_best = min(f_list)
@@ -72,52 +76,52 @@ def beliakov_cav(x, y, order = 4, g = 4, gamma= 0.000001, runtime = 60*3, glob_m
     differenz = 100
     it = 0
     '''
-    Cutting-Angle-Verfahren terminiert nach max Laufzeit "runtime". Es kann jedoch auch das Abbruchkriterium aus (4.19) ver-
-    wendet werden oder beide. differenz bezeichnet f_{best} - \bar{d}.
+    Cutting Angle method terminates after max runtime "runtime". However, the termination criterion from (4.19) can also be used.
+    or both. difference denotes f_{best} - \bar{d}.
     '''
-    while(time.time() < timeout and differenz > 0.01): #Abbruchkriterium: differenz > 0.001
-        print('----neue iteration-----:', it)
+    while(time.time() < timeout and differenz > 0.01): #Termination criterion: difference > 0.001
+        print('----new iteration-----:', it)
 
-        #Berechnung von \bar{d} aus Algorithmus 4.11
+        #Calculation of \bar{d} from Algorithm 4.11
         if(len(L_k) == 1):
             d_min = cal_d_1_element_new(L_k[0])
             i_min = 0
         else:
             d_min, i_min = cal_d_min_and_i_min_new(L_k)
 
-        #Berechnung von x^{\star} aus Algorithmus 4.11 und Rücktransformation in Knoten-Koordinaten
+        #Calculation of x_star from algorithm 4.11 with corresponding coordinate transformation
         x_star = eval_x_star_new(d_min, L_k[i_min])
         t_star = retransform_knots(a, b, x_star)
-        print('Berechneter Knoten:', t_star)
+        print('Calculated knot vector:', t_star)
         knots_list.append(t_star)
 
-        #Berechnung des Fehlers aus (6.1) in dem berechneten Knoten-Vektor
+        #Calculation of the error from (6.1) in the calculated node vector
         error = cal_delta_fehler(x, y ,t_star, order, g)
         fehler_list.append(error)
-        print('Aktuell kleinster Fehler:', min(fehler_list))
-        print('Das ist der index zum kleinsten Fehler:', fehler_list.index(min(fehler_list)))
+        print('Current smallest error:', min(fehler_list))
+        print('This is the index to the smallest error:', fehler_list.index(min(fehler_list)))
 
-        L_k_delete = L_k[i_min] #L_k[i_min] mit dem gloabler Minimalpunkt berechnet worden ist, wird in L_k_delete gespeichert
+        L_k_delete = L_k[i_min] #L_k[i_min] has been calculated with the gloabler minimum point is stored in L_k_delete
         L_k_minus_1 = L_k
         f_x_star = Function_iph(x, y, t_star, starting_knots, order, g, L)
-        f_best = min(f_x_star, f_best) #f_best wird aktualisiert
+        f_best = min(f_x_star, f_best) #f_best is updated
 
-        #Kleinster bisher berechneter Funktionswert wird ausgegeben
+        #Smallest function value calculated so far is output
         min_list.append(f_x_star)
         min1 = min(min_list)
         imin = min_list.index(min(min_list))
-        #print('Aktueller min Index:', imin)
-        #print('Aktueller min Fktswert', min1)
+        #print('Current min index:', imin)
+        #print('Current min function value', min1)
 
-        l_k = eval_l_k_new(f_x_star, x_star) #neues l^K wird berechnet
-        L_k = eval_L_k(L_k_minus_1, l_k, f_best) #L_k wird aktualisiert
+        l_k = eval_l_k_new(f_x_star, x_star) #new l^K is calculated
+        L_k = eval_L_k(L_k_minus_1, l_k, f_best) #L_k is updated
         it = it + 1
 
-        #Abbruchkriterium f_best - \bar{d} wird aktualisiert
+        #Termination criterion f_best - \bar{d} is updated
         d_stop, i_stop = cal_d_min_and_i_min_new(L_k)
         differenz = f_best - d_stop
         print('f_best - bar{d}', differenz)
-    #Kleinster Fehler und dazugehöriger Knoten wird ausgegeben
+    #Smallest error and associated node is output
     min1 = min(fehler_list)
     imin = fehler_list.index(min(fehler_list))
     min_knot = knots_list[imin]
@@ -125,11 +129,11 @@ def beliakov_cav(x, y, order = 4, g = 4, gamma= 0.000001, runtime = 60*3, glob_m
     return min1, min_knot
 
 ##########################################################################################
-############# Funktionen die benötigt werden, um Funktionswerte auszuwerten ##############
+############# Functions that are needed to evaluate function values ######################
 ##########################################################################################
 
 '''
-Berechnung des B-Splines.
+Calculation of the B-spline.
 '''
 def B(x, k, i, lambda1):
     if k == 0:
@@ -145,7 +149,7 @@ def B(x, k, i, lambda1):
     return c1 + c2
 
 '''
-Berechne Spline-Funktion als Linearkombination von B-Splines.
+Calculate spline function as linear combination of B-splines.
 '''
 def bspline(x, lambda1, c, k):
     n = len(lambda1) - k - 1
@@ -154,7 +158,7 @@ def bspline(x, lambda1, c, k):
     return sum(c[i] * B(x, k, i, lambda1) for i in range(n))
 
 '''
-Berechnung von Delta aus (3.1) der BA.
+Calculation of delta from (3.1) of the paper.
 '''
 def Delta(x, y, coefficients, order, knots):
     I = len(x)
@@ -164,7 +168,7 @@ def Delta(x, y, coefficients, order, knots):
     return delta
 
 '''
-Berechnung des Fehler aus (6.1) der BA.
+Calculation of the error from (6.1) of the paper.
 '''
 def Delta_fehler(x, y, coefficients, order, knots):
     I = len(x)
@@ -176,7 +180,7 @@ def Delta_fehler(x, y, coefficients, order, knots):
     return delta_sqrt
 
 '''
-Berechnung des Fehler nach (6.1). Es sei darauf hingewiesen, dass nur die inneren Knoten übergeben werden.
+Calculation of the error according to (6.1). It should be noted that only the inner nodes are passed.
 '''
 def cal_delta_fehler(x, y, knots, order, g):
     k = order - 1
@@ -192,8 +196,7 @@ def cal_delta_fehler(x, y, knots, order, g):
     return fehler
 
 '''
-Berechnung von Delta. Es sei hierbei angemerkt, dass dieser
-Methode die inneren und äußeren Knoten übergeben werden müssen.
+Calculation of delta. It should be noted here that this method must be passed the inner and outer nodes.
 '''
 def Function(knots, x, y, coefficients, order, starting_knots, g):
     intervall_lower_bound = min(x)
@@ -204,7 +207,7 @@ def Function(knots, x, y, coefficients, order, starting_knots, g):
     return result
 
 '''
-Berechnung von E^TE aus (3.7) der BA.
+Calculation of E^TE from (3.7) of the paper.
 '''
 def matrixEtE(x, y, knots, order, g):
     k = order - 1
@@ -221,7 +224,7 @@ def matrixEtE(x, y, knots, order, g):
     return e
 
 '''
-Berechnung der rechten Seite aus (3.7) der BA.
+Calculation of the right side from (3.7) of the paper.
 '''
 def rechteseite(x, y, knots, order, g):
     k = order - 1
@@ -237,7 +240,7 @@ def rechteseite(x, y, knots, order, g):
     return rt
 
 '''
-LGS aus (3.7) wird mit Hilfe einer QR-Zerlegung gelöst.
+LGS from (3.7) is solved using a QR decomposition.
 '''
 def qrzerlegung(x, y, knoten, order, g):
     e = matrixEtE(x, y, knoten, order, g)
@@ -251,10 +254,10 @@ def qrzerlegung(x, y, knoten, order, g):
     return x_qr
 
 '''
-Berechnung der Funktion f(p) aus (4.39), wobei p aus (4.30) gewählt wird. D.h die Funktion wird in "Knoten-Koordinaten"
-ausgewertet. lambda_k entspricht dem Knoten-Vektor, an dem die Funktion ausgewertet wird. starting_knots entspricht
-dem globalen Minimalpunkt von \tilde{\delta}(p) s.t. p \in \mathcal{P}. starting_knots wird benötigt, um c zu berechnen.
-Dieser Methode werden ausschließlich die inneren Knoten übergeben.
+Compute the function f(p) from (4.39), where p is chosen from (4.30). I.e. the function is evaluated in "node coordinates".
+lambda_k corresponds to the node vector at which the function is evaluated. starting_knots corresponds to
+the global minimum point of \tilde{\delta}(p) s.t. p \in \mathcal{P}. starting_knots is needed to calculate c.
+Only the inner knots are passed to this method.
 '''
 def Function_iph(x, y, lambda_k, starting_knots, order, g, L):
     k = order - 1
@@ -263,10 +266,10 @@ def Function_iph(x, y, lambda_k, starting_knots, order, g, L):
 
 
     '''
-    Äußere Knoten werden an die inneren Knoten (hier die globalen Minimalpunkte) ergänzt, da die Methode Function() mit
-    den inneren und äußeren Knoten arbeitet.
+    Outer nodes are added to the inner nodes (here the global minimal points), because the method Function() works with
+    the inner and outer nodes.
     '''
-    #Hier sollte darauf geachtet werden, dass bei einem neuen Datensatz die äußeren Knoten-Vektoren angepasst werden
+    #Here, care should be taken to adjust the outer node vectors for a new data set
     minus_k = np.array([min(x), min(x), min(x), min(x)])
     g_plus_k = np.array([max(x), max(x), max(x), max(x)])
 
@@ -278,10 +281,10 @@ def Function_iph(x, y, lambda_k, starting_knots, order, g, L):
     #\min_{p \in \mathcal{P}} \tilde{\delta}(p) wird ausgewertet
     upper_bound = Function(minus_k_bis_g_plus_k, x, y, coeff, order, minus_k_bis_g_plus_k, g)
     '''
-    Äußere Knoten werden an die inneren Knoten (hier die Knoten an dem Funktion ausgewertet wird) ergänzt, da
-    die Methode Function() mit den inneren und äußeren Knoten arbeitet.
+    Outer nodes are added to the inner nodes (here the nodes at which function is evaluated), since
+    the Function() method works with the inner and outer nodes.
     '''
-    #Hier sollte darauf geachtet werden, dass bei einem neuen Datensatz die äußeren Knoten-Vektoren angepasst werden
+    #Here, care should be taken to adjust the outer node vectors for a new data set
     minus_k = np.array([min(x), min(x), min(x), min(x)])
     g_plus_k = np.array([max(x), max(x), max(x), max(x)])
 
@@ -291,15 +294,15 @@ def Function_iph(x, y, lambda_k, starting_knots, order, g, L):
     minus_k_bis_g_plus_k = minus_k_bis_g
     coeff = qrzerlegung(x, y, minus_k_bis_g_plus_k, order, g)
 
-    #Zielfunktion aus (4.39) wird ausgegeben
+    #Target function from (4.39) is output
     return Function(minus_k_bis_g_plus_k, x, y, coeff, order, minus_k_bis_g_plus_k, g) + 2*L - upper_bound
 
-#############################################################################
-################## Methoden des Cutting-Angle-Verfahrens ####################
-#############################################################################
+######################################################################################
+################## Cutting Angle Methods functions ###################################
+######################################################################################
 
 '''
-Elemente des modifizierten Simplex aus (4.38) werden zu Knoten-Vektoren transformiert. Siehe (4.31).
+Elements of the modified simplex from (4.38) are transformed to node vectors. See (4.31).
 '''
 def retransform_knots(a, b, x_star):
     t = np.zeros(len(x_star) - 1)
@@ -311,13 +314,13 @@ def retransform_knots(a, b, x_star):
     return t
 
 '''
-Schritt 3. und 4. aus Algorithmus 4.11. Es sei angemerkt, dass mit "check_condition_3_new()" Bedingung (3.) aus der BA
-geprüft wird und mit "check_condition_2_new()" Bedingung (2.) aus der BA geprüft wird
+Steps 3. and 4. from Algorithm 4.11. It should be noted that with "check_condition_3_new()" Condition (3.) from the paper
+and with "check_condition_2_new()" condition (2.) from the paper is checked.
 '''
 def eval_L_k(L_k_minus_1, l_k, f_best):
     L_k = []
     L_minus = []
-    #Schritt 3. aus Algorithmus 4.11
+    #Step 3. from algorithm 4.11
     for i in range(len(L_k_minus_1)):
         check = check_condition_3_new(L_k_minus_1[i], l_k)
         if(check == True):
@@ -326,26 +329,26 @@ def eval_L_k(L_k_minus_1, l_k, f_best):
         else:
             L_k_minus_1_copy_1 = [list(x) for x in L_k_minus_1[i]]
             L_minus.append(L_k_minus_1_copy_1)
-    #Schritt 4. aus Algorithmus 4.11
+    #Step 4. from algorithm 4.11
     L_minus_copy = [list(x) for x in L_minus]
-    #Schritt 4. (a)
+    #Step 4. (a)
     for i in range(len(L_minus)):
         for j in range(len(L_minus[i])):
             L_minus[i][j] = l_k
-            #Schritt 4. (b)
+            #Step 4. (b)
             check = check_condition_2_new(L_minus[i])
             d_L = cal_d_1_element_new_d(L_minus[i])
-            #Schritt 4.(c)
+            #Step 4.(c)
             if(check == True and d_L < f_best):
                 L_minus_copy_1 = [list(x) for x in L_minus[i]]
                 L_k.append(L_minus_copy_1)
                 L_minus[i] = [list(x) for x in L_minus_copy[i]]
             L_minus[i] = [list(x) for x in L_minus_copy[i]]
-    #Schritt 4. (d)
+    #Step 4. (d)
     return L_k
 
 '''
-Bedingung (3.) aus Satz 4.8 wird geprüft.
+Requirement (3.) from Theorem 4.8 is checked.
 '''
 def check_condition_3_new(L_k_minus_1, l_k):
     diag_L = np.diag(L_k_minus_1)
@@ -357,7 +360,7 @@ def check_condition_3_new(L_k_minus_1, l_k):
     return False
 
 '''
-Bedingung (2.) aus Satz 4.8 wird geprüft.
+Condition (2.) from Theorem 4.8 is checked.
 '''
 def check_condition_2_new(L_minus):
     diag_L_minus = np.diag(L_minus)
@@ -371,8 +374,8 @@ def check_condition_2_new(L_minus):
     return True
 
 '''
-Berechnung von \bar{d} und gibt zusätzlich Index des \bar{L} \in \mathcal{L}^K aus, um x^{\star} berechnen zu können.
-Methode ist für \vert \mathcal{L}^K \vert > 1.
+Calculation of \bar{d} and additionally outputs index of \bar{L} \in \mathcal{L}^K to be able to calculate x^{\star}.
+Method is for \vert \mathcal{L}^K \vert > 1.
 '''
 def cal_d_min_and_i_min_new(L_k):
     d_list = []
@@ -394,8 +397,8 @@ def cal_d_min_and_i_min_new(L_k):
     return d_min, i_min
 
 '''
-Berechnung von \bar{d} und gibt zusätzlich Index des \bar{L} \in \mathcal{L}^K aus, um x^{\star} berechnen zu können.
-Methode ist für \vert \mathcal{L}^K \vert = 1.
+Calculation of \bar{d} and additionally outputs index of \bar{L} \in \mathcal{L}^K to be able to calculate x^{\star}.
+Method is for \vert \mathcal{L}^K \vert = 1.
 '''
 def cal_d_1_element_new(L_k):
     d_min = 0
@@ -410,7 +413,7 @@ def cal_d_1_element_new(L_k):
     return d_min
 
 '''
-Berechnung von x^{\star} aus Schritt 1.(b).
+Calculation of x^{\star} from step 1.(b).
 '''
 def eval_x_star_new(d_min, L_k_min):
     x_star = []
@@ -420,7 +423,7 @@ def eval_x_star_new(d_min, L_k_min):
     return x_star
 
 '''
-Berechnung von l^K aus Schritt 2.(b).
+Calculation of l^K from step 2.(b).
 '''
 def eval_l_k_new(f_x_star, x_star):
     l_k = []
@@ -429,8 +432,8 @@ def eval_l_k_new(f_x_star, x_star):
     return l_k
 
 '''
-Berechung zur Überprüfung von d_L < f_best. Es kann auch "cal_d_1_element_new()" verwendet werden. Lediglich aus
-Gründen der Übersichtlichkeit hinzugefügt.
+Calculation to check d_L < f_best. You can also use "cal_d_1_element_new()". Only for
+added for reasons of clarity.
 '''
 def cal_d_1_element_new_d(L_k):
     d_min = 0

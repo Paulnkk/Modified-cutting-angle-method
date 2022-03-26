@@ -22,7 +22,7 @@ The main modifications to the cutting angle method by G.Beliakov:
 
 - Different feasible set ('modified Simplex')
 
-- auxiliary vectors
+- Constrcution of auxiliary vectors
 
 - Coordinate transformation into the modified Simplex
 

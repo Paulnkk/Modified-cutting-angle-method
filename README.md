@@ -20,9 +20,11 @@ The modified Cutting angle method is based on findings of 'Cutting angle method 
 
 The main modifications to the cutting angle method by G.Beliakov:
 
-- Modified cutting angle method is applied on a different feasible set ('modified Simplex')
+- Different feasible set ('modified Simplex')
 
-- Auxiliary vectors for the solution and determination of the auxiliary problems are constructed differently
+- auxiliary vectors
+
+- Coordinate transformation into the modified Simplex
 
 - Update of the bounds to the optimal objective function value 
 

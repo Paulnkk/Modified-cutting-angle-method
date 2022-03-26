@@ -32,7 +32,7 @@ The main modifications to the cutting angle method by G.Beliakov:
 
 A convergence proof of the modified cutting angle method supported by 'Global Minimization of Increasing Positively Homogeneous Functions over the Unit Simplex' (https://link.springer.com/article/10.1023/A:1019204407420) by A.Bagirov, A.Rubinov is additionally presented.
 
-
+Current challenges: Solving subproblems consumes huge amount of computational ressources due to exponential increasing complexity
 
 Code:
 

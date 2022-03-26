@@ -33,6 +33,7 @@ The main modifications to the cutting angle method by G.Beliakov:
 A convergence proof of the modified cutting angle method supported by 'Global Minimization of Increasing Positively Homogeneous Functions over the Unit Simplex' (https://link.springer.com/article/10.1023/A:1019204407420) by A.Bagirov, A.Rubinov is additionally presented.
 
 
+
 Code:
 
 The modified cutting angle method can be executed with the file run_cav.py and the implemented algorithm is located in cav.py. All further explanations about the execution of the code are included in the comments of the py files.

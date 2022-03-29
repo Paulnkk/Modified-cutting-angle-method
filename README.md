@@ -22,13 +22,13 @@ The main modifications to the cutting angle method by G.Beliakov:
 
 - Different feasible set ('modified Simplex')
 
-- Constrcution of auxiliary vectors
+- Construction of auxiliary vectors
 
 - Coordinate transformation into the modified Simplex
 
 - Update of the bounds to the optimal objective function value 
 
-- Subproblems are solved by different numerical methods than in the original paper
+- Subproblems are solved based on different theoretcial results than in the original paper
 
 A convergence proof of the modified cutting angle method supported by 'Global Minimization of Increasing Positively Homogeneous Functions over the Unit Simplex' (https://link.springer.com/article/10.1023/A:1019204407420) by A.Bagirov, A.Rubinov is additionally presented.
 

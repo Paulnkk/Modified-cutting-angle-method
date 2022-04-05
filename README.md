@@ -7,7 +7,7 @@ For further questions about the code and the work I am always available: paul-ni
 Introduction:
 
 Splines are techniques of non-linear regression from the field of supervised learning.
-These functions are continuous polynomial functions defined on an interval (the interval is defined as [min(x), max(x)] in the case of data points from R^2, if x is an n-dimensional vector with data points for x values). The spline function is defined on subintervals (intervals which are subsets of [min(x), max(x)]) as polynomials of degree at most m which are connected at the boundaries of the subintervals.  The boundaries of the subintervals, i.e. the connecting points, are called 'nodes'. 
+These functions are continuous polynomial functions defined on an interval (the interval is defined as [min(x), max(x)] in the case of data points from R^2, if x is an n-dimensional vector with data points for x values). The spline function is defined on subintervals (intervals which are subsets of [min(x), max(x)]) as polynomials of degree at most m which are connected at the boundaries of the subintervals.  The boundaries of the subintervals, i.e. the connecting points, are called 'knots'. 
 Here the question arises how such nodes are determined, since the arbitrary choice of nodes most likely extrapolates the data set insufficiently. 
 
 The modified cutting angle method calculates the knots (the number of knots is determined in advance) so that the distance of the spline function to the y-values of the data is minimal (in the case of data points from R^2). In other words, the modified cutting angle method globally tries to solve a nonlinear least squares problem. 

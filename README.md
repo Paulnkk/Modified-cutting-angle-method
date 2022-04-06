@@ -14,7 +14,7 @@ The modified cutting angle method calculates the knots (the number of knots is d
 
 The cutting angle method iteratively approximates the actual problem by auxiliary problems. In the plane, the auxiliary problems look like ordered cutting angles, which is where the method gets its name. These auxiliary problems are solved globally in each iteration until the termination criterion takes effect (i.e. until the auxiliary problem sufficiently approximates the actual problem and thus also generates a sufficiently satisfactory solution at the global minimum point of the problem). 
 
-It should be noted here that the feasible set of the actual problem must be transformed into a special version of a simplex via a coordinate transformation in each iteration before the modified cutting angle method can be applied.
+Due to the fact that there are no global optimization approaches (except for the cutting-angle method) to solve the least squares spline problem with free knots, I have developed a heuristic method, starting from a starting point determined by the cutting-angle method, initializes a local optimization procedure (CG) that computes several approximations to the global minimum point within a certain runtime and generates the solution that has the smallest error.
 
 The modified Cutting angle method is based on findings of 'Cutting angle method - a tool for constrained global optimization' (https://www.tandfonline.com/doi/abs/10.1080/10556780410001647177) by G.Beliakov.
 
@@ -29,6 +29,8 @@ The main modifications to the cutting angle method by G.Beliakov:
 - Update of the bounds to the optimal objective function value 
 
 - Subproblems are solved based on different theoretcial results than in the original paper
+
+- Devlopment of a heuristic approach combining Modified CG-Method and the Cutting-angle method
 
 A convergence proof of the modified cutting angle method supported by 'Global Minimization of Increasing Positively Homogeneous Functions over the Unit Simplex' (https://link.springer.com/article/10.1023/A:1019204407420) by A.Bagirov, A.Rubinov is additionally presented.
 
